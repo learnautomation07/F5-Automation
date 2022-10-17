@@ -1,6 +1,6 @@
 ---
 - name: BIG-IP SETUP
-  hosts: lb
+  hosts: F5-01
   connection: local
   gather_facts: false
 
@@ -12,56 +12,14 @@
           server: "{{ ansible_host }}"
           # user: "{{ f5_admin_user }}"
           # password: "{{ f5_admin_password }}"
-          server_port: "{{ f5_admin_port }}"
+          server_port: "443"
           validate_certs: false
-
-    - name: Find Active Machine
-      f5networks.f5_modules.bigip_command:
-        provider: "{{ provider }}"
-        match: "any"
-        warn: no
-        commands:
-          - bash -c "cat /var/prompt/ps1"
-      register: result
-  
-    - debug:
-        var: result.stdout
-
-    - name: CREATE NODES
-      f5networks.f5_modules.bigip_node:
-        provider: "{{ provider }}"
-        host: "{{hostvars[item].ansible_host}}"
-        name: "{{hostvars[item].inventory_hostname}}"
-      loop: "{{ groups['web_servers'] }}"
-      when: '"Active" in result.stdout'
-
-    - name: CREATE POOL
-      f5networks.f5_modules.bigip_pool:
-        provider: "{{ provider }}"
-        name: "{{ vip_name }}_pool"
-        lb_method: "round-robin"
-        monitors: "/Common/http"
-        monitor_type: "and_list"
-      when: '"Active" in result.stdout'
-
-    - name: ADD POOL MEMBERS
-      f5networks.f5_modules.bigip_pool_member:
-        provider: "{{ provider }}"
-        state: "present"
-        name: "{{hostvars[item[0]].inventory_hostname}}"
-        host: "{{hostvars[item[0]].ansible_host}}"
-        port: "{{item[1]}}"
-        pool: "{{ vip_name }}_pool"
-      with_nested:
-        - "{{ groups['web_servers'] }}"
-        - "{{ docker_ports }}"
-      when: '"Active" in result.stdout'
-
+    
     - name: ADD VIRTUAL SERVER
       f5networks.f5_modules.bigip_virtual_server:
         provider: "{{ provider }}"
-        name: "{{ vip_name }}"
-        destination: "{{ vip_ip }}"
+        name: "test_VIP"
+        destination: "172.16.10.50"
         port: "443"
         enabled_vlans: "all"
         all_profiles: ['http', 'clientssl', 'oneconnect']
