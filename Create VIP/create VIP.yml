@@ -1,0 +1,34 @@
+---
+- name: BIG-IP SETUP
+  hosts: F5-01
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Setup provider
+      ansible.builtin.set_fact:
+        provider:
+          server: "{{ ansible_host }}"
+          # user: "{{ f5_admin_user }}"
+          # password: "{{ f5_admin_password }}"
+          server_port: "443"
+          validate_certs: false
+    
+    - name: ADD VIRTUAL SERVER
+      f5networks.f5_modules.bigip_virtual_server:
+        provider: "{{ provider }}"
+        name: "test_VIP"
+        destination: "172.16.10.50"
+        port: "443"
+        enabled_vlans: "all"
+        all_profiles: ['http', 'clientssl', 'oneconnect']
+        pool: "{{ vip_name }}_pool"
+        snat: "Automap"
+      when: '"Active" in result.stdout'
+
+    - name: SAVE RUNNING CONFIG ON BIG-IP
+      f5networks.f5_modules.bigip_config:
+        provider: "{{ provider }}"
+        save: true
+      when: '"Active" in result.stdout'
