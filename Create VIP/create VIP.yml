@@ -41,6 +41,7 @@
         enabled_vlans: "all"
         all_profiles: ['http', 'clientssl', 'oneconnect']
         snat: "Automap"
+        pool: "Web_pool"
 
     - name: SAVE RUNNING CONFIG ON BIG-IP
       f5networks.f5_modules.bigip_config:
