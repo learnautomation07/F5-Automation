@@ -14,6 +14,23 @@
           # password: "{{ f5_admin_password }}"
           server_port: "443"
           validate_certs: false
+  
+    - name: CREATE POOL
+      f5networks.f5_modules.bigip_pool:
+        provider: "{{ provider }}"
+        name: "Web_pool"
+        lb_method: "round-robin"
+        monitors: "/Common/https"
+        monitor_type: "and_list"
+        
+    - name: ADD POOL MEMBERS
+      f5networks.f5_modules.bigip_pool_member:
+        provider: "{{ provider }}"
+        state: "present"
+        name: "{{hostvars[item[0]].inventory_hostname}}"
+        host: "{{hostvars[item[0]].ansible_host}}"
+        port: "{{item[1]}}"
+        pool: "Web_pool"
     
     - name: ADD VIRTUAL SERVER
       f5networks.f5_modules.bigip_virtual_server:
