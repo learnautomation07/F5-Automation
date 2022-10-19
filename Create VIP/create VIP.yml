@@ -22,6 +22,15 @@
         lb_method: "round-robin"
         monitors: "/Common/https"
         monitor_type: "and_list"
+        
+    - name: ADD POOL MEMBERS
+      f5networks.f5_modules.bigip_pool_member:
+        provider: "{{ provider }}"
+        state: "present"
+        name: "Member-1"
+        host: "172.16.20.20"
+        port: "443"
+        pool: "Web_pool"
     
     - name: ADD VIRTUAL SERVER
       f5networks.f5_modules.bigip_virtual_server:
