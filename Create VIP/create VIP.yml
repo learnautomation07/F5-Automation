@@ -5,7 +5,6 @@
   gather_facts: false
 
   tasks:
-
     - name: Setup provider
       ansible.builtin.set_fact:
         provider:
@@ -14,23 +13,6 @@
           # password: "{{ f5_admin_password }}"
           server_port: "443"
           validate_certs: false
-  
-    - name: CREATE POOL
-      f5networks.f5_modules.bigip_pool:
-        provider: "{{ provider }}"
-        name: "App_pool"
-        lb_method: "round-robin"
-        monitors: "/Common/https"
-        monitor_type: "and_list"
-        
-    - name: ADD POOL MEMBERS
-      f5networks.f5_modules.bigip_pool_member:
-        provider: "{{ provider }}"
-        state: "present"
-        name: "Member-1"
-        host: "172.16.20.20"
-        port: "443"
-        pool: "App_pool"
     
     - name: ADD VIRTUAL SERVER
       f5networks.f5_modules.bigip_virtual_server:
@@ -41,7 +23,6 @@
         enabled_vlans: "all"
         all_profiles: ['http', 'clientssl', 'oneconnect']
         snat: "Automap"
-        pool: "App_pool"
 
     - name: SAVE RUNNING CONFIG ON BIG-IP
       f5networks.f5_modules.bigip_config:
